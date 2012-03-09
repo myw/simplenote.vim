@@ -482,6 +482,7 @@ class SimplenoteVimInterface(object):
         vim.command("setlocal nocursorline")
         vim.command("setlocal modifiable")
         vim.command("setlocal buftype=acwrite")
+        vim.command("setlocal filetype=markdown")
         vim.command("setlocal bufhidden=delete")
         vim.command("au! BufWriteCmd <buffer> call s:UpdateNoteFromCurrentBuffer()")
         buffer[:] = map(lambda x: str(x), note["content"].split("\n"))
