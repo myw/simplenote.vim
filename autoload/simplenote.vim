@@ -62,15 +62,20 @@ endif
 let g:simplenote_scratch_buffer = 'Simplenote'
 
 " Function that opens or navigates to the scratch buffer.
-function! s:ScratchBufferOpen(name)
-	let exe_new = "new "
-	let exe_split = "split "
+function! s:ScratchBufferOpen(name, rightbelow)
+    let exe_new = "new "
+    let exe_split = "split "
 
-	if s:vbuff > 0
-		let exe_new = "vert " . exe_new
-		let exe_split = "vert " . exe_split
-	endif
-	
+    if a:rightbelow > 0
+        let exe_new = "rightbelow " . exe_new
+        let exe_split = "rightbelow " . exe_split
+    endif
+
+    if s:vbuff > 0
+        let exe_new = "vert " . exe_new
+        let exe_split = "vert " . exe_split
+    endif
+
 
     let scr_bufnum = bufnr(a:name)
     if scr_bufnum == -1
@@ -464,7 +469,7 @@ class SimplenoteVimInterface(object):
         Arguments:
         sb_name - name of the scratch buffer
         """
-        vim.command("call s:ScratchBufferOpen('%s')" % sb_name)
+        vim.command('call s:ScratchBufferOpen("%s", 0)' % sb_name)
 
     def display_note_in_scratch_buffer(self):
         """ displays the note corresponding to the given key in the scratch
@@ -475,7 +480,7 @@ class SimplenoteVimInterface(object):
         note_id = self.note_index[int(line) - 1]
         # store it as a global script variable
         note, status = self.simplenote.get_note(note_id)
-        vim.command("""call s:ScratchBufferOpen("%s")""" % note_id)
+        vim.command('call s:ScratchBufferOpen("%s", 1)' % note_id)
         self.set_current_note(note_id)
         buffer = vim.current.buffer
         # remove cursorline
