@@ -136,8 +136,8 @@ class Simplenote(object):
 
     def __init__(self, username, password):
         """ object constructor """
-        self.username = urllib2.quote(username)
-        self.password = urllib2.quote(password)
+        self.username = urllib.quote(username)
+        self.password = urllib.quote(password)
         self.token = None
 
     def authenticate(self, user, password):
@@ -156,7 +156,7 @@ class Simplenote(object):
         request = Request(AUTH_URL, values)
         try:
             res = urllib2.urlopen(request).read()
-            token = urllib2.quote(res)
+            token = urllib.quote(res)
         except IOError: # no connection exception
             token = None
         return token
@@ -370,6 +370,7 @@ class Request(urllib2.Request):
 
 
 import vim
+import sys
 import time
 import math as m
 from threading import Thread
@@ -453,14 +454,22 @@ class SimplenoteVimInterface(object):
 
         Returns list of fetched notes
         """
-        queue = Queue()
         note_list = []
-        for key in key_list:
-            queue.put(key)
-            t = NoteFetcher(queue, note_list, self.simplenote)
-            t.start()
 
-        queue.join()
+        # Parallel version
+        if sys.version_info[0] >= 2 and sys.version_info[1] >= 5:
+            queue = Queue()
+            for key in key_list:
+                queue.put(key)
+                t = NoteFetcher(queue, note_list, self.simplenote)
+                t.start()
+
+            queue.join()
+        # Serial version, doesn't take advantage of new Queue features
+        else:
+            for key in key_list:
+                note_list.append(self.simplenote.get_note(key))
+
         return note_list
 
     def scratch_buffer(self, sb_name = DEFAULT_SCRATCH_NAME):
